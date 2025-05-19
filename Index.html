@@ -1,0 +1,145 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Magnet & Star Fragment Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: #f0f0f0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #1e1e1e;
+      padding: 1.5rem;
+      border-radius: 10px;
+    }
+    label, select, input, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    input, select {
+      padding: 0.5rem;
+      border: none;
+      border-radius: 5px;
+    }
+    button {
+      background: #00bcd4;
+      color: white;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .results {
+      margin-top: 1.5rem;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <h1>Magnet & Star Fragment Calculator</h1>
+  <div class="container">
+    <label for="mode">Choose Mode:</label>
+    <select id="mode">
+      <option value="sell">MagnetPerSell</option>
+      <option value="storm">MagnetsPerStorm</option>
+    </select><div id="inputs"></div>
+
+<button onclick="calculate()">Calculate</button>
+
+<div class="results" id="results"></div>
+
+  </div>  <script>
+    const inputsDiv = document.getElementById("inputs");
+    const resultsDiv = document.getElementById("results");
+
+    function renderInputs() {
+      const mode = document.getElementById("mode").value;
+      if (mode === "sell") {
+        inputsDiv.innerHTML = `
+          <label>Spawn Cooldown (sec):</label>
+          <input type="number" id="cooldown" />
+
+          <label>Star Fragments per item:</label>
+          <input type="number" id="price" step="0.001" />
+
+          <label>Magnet chance per item (0-1):</label>
+          <input type="number" id="magnet_chance" step="0.01" />
+
+          <label>Work Hours:</label>
+          <input type="number" id="hours" />
+        `;
+      } else {
+        inputsDiv.innerHTML = `
+          <label>Items per event:</label>
+          <input type="number" id="items_per_event" />
+
+          <label>Chance for 6 magnets (0-1):</label>
+          <input type="number" id="bonus_chance" step="0.01" />
+
+          <label>Magnets per minute (bonus):</label>
+          <input type="number" id="magnets_per_min" step="0.01" />
+
+          <label>Work Hours:</label>
+          <input type="number" id="hours" />
+        `;
+      }
+    }
+
+    function calculate() {
+      const mode = document.getElementById("mode").value;
+      const hours = parseFloat(document.getElementById("hours").value);
+      const seconds = hours * 3600;
+      const minutes = hours * 60;
+
+      if (mode === "sell") {
+        const cooldown = parseFloat(document.getElementById("cooldown").value);
+        const price = parseFloat(document.getElementById("price").value);
+        const magnetChance = parseFloat(document.getElementById("magnet_chance").value);
+
+        const intervals = seconds / cooldown;
+        const totalItems = intervals * 1.5;
+        const totalMagnets = totalItems * magnetChance;
+        const totalFragments = totalItems * price;
+
+        resultsDiv.innerHTML = `
+          Total Items: ${Math.floor(totalItems)}<br>
+          Magnets Earned: ${Math.floor(totalMagnets)}<br>
+          Star Fragments Earned: ${totalFragments.toFixed(2)}
+        `;
+      } else {
+        const items = parseInt(document.getElementById("items_per_event").value);
+        const bonusChance = parseFloat(document.getElementById("bonus_chance").value);
+        const magnetsPerMin = parseFloat(document.getElementById("magnets_per_min").value);
+
+        const events = minutes / 5;
+        const totalItems = events * items;
+        const avgMagnets = (1 - bonusChance) * 2 + bonusChance * 6;
+        const fromEvents = totalItems * avgMagnets;
+        const bonus = minutes * magnetsPerMin;
+        const total = fromEvents + bonus;
+
+        resultsDiv.innerHTML = `
+          Total Items: ${Math.floor(totalItems)}<br>
+          Magnets from Events: ${Math.floor(fromEvents)}<br>
+          Bonus Magnets: ${Math.floor(bonus)}<br>
+          <strong>Total Magnets: ${Math.floor(total)}</strong>
+        `;
+      }
+    }
+
+    document.getElementById("mode").addEventListener("change", renderInputs);
+    renderInputs();
+  </script></body>
+</html>
