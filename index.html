@@ -1,124 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Magnet Calculator</title>
-  <style>
-    body {
-      background-color: #121212;
-      color: #e0e0e0;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 {
-      color: #ffffff;
-    }
-    button {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #2196f3;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #1976d2;
-    }
-    input {
-      margin: 5px;
-      padding: 5px;
-      border: 1px solid #333;
-      border-radius: 4px;
-      background-color: #1e1e1e;
-      color: white;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #00e676;
-      font-weight: bold;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magnets Calculator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Scrap Clicker 2 Magnet Calculator</h1>
+    <div class="container">
+        <h1>Magnets Calculator</h1>
+        <div id="mode-selection">
+            <h2>Choose a mode:</h2>
+            <button onclick="showSellForm()">Magnets Per Sell</button>
+            <button onclick="showStormForm()">Magnets Per Storm</button>
+        </div>
 
-  <button onclick="showMagnetPerSell()">MagnetPerSell</button>
-  <button onclick="showMagnetsPerStorm()">MagnetsPerStorm</button>
+        <div id="sell-form" class="form" style="display:none;">
+            <h2>Magnets Per Sell</h2>
+            <label>Work hours: <input type="number" id="workHoursSell" step="0.1"></label>
+            <label>Spawn cooldown in seconds: <input type="number" id="cooldown"></label>
+            <label>Star fragments per item on sell: <input type="number" id="sellPrice"></label>
+            <label>Chance to get 2 items instead of 1 (in %): <input type="number" id="twoItemChance"></label>
+            <label>Chance to get a magnet when you sell an item (in %): <input type="number" id="magnetPerSellChance"></label>
+            <label>How many magnets per sell (if it happens): <input type="number" id="magnetPerSellAmount"></label>
+            <label>Chance to get magnets on item spawn (in %): <input type="number" id="magnetPerSpawnChance"></label>
+            <label>How many magnets per spawn (if it happens): <input type="number" id="magnetPerSpawnAmount"></label>
+            <label>Final percentage boost on all magnets (e.g., 54 for 54%): <input type="number" id="percentageBoost"></label>
+            <button onclick="calculateSell()">Calculate</button>
+            <div id="sell-results" class="results"></div>
+        </div>
 
-  <div id="inputs"></div>
-  <div id="result"></div>
-
-  <script>
-    function showMagnetPerSell() {
-      document.getElementById("inputs").innerHTML = `
-        <h3>MagnetPerSell</h3>
-        <label>Work hours:</label><input id="mps_hours" type="number">
-        <label>Spawn cooldown (seconds):</label><input id="mps_cooldown" type="number">
-        <label>Sell price (in star fragments):</label><input id="mps_price" type="number" step="0.01">
-        <label>Chance to get magnet (0–1):</label><input id="mps_chance" type="number" step="0.01">
-        <br><button onclick="calcMagnetPerSell()">Calculate</button>
-      `;
-      document.getElementById("result").innerText = "";
-    }
-
-    function calcMagnetPerSell() {
-      let hours = parseFloat(document.getElementById("mps_hours").value);
-      let cooldown = parseFloat(document.getElementById("mps_cooldown").value);
-      let price = parseFloat(document.getElementById("mps_price").value);
-      let chance = parseFloat(document.getElementById("mps_chance").value);
-
-      let totalSpawns = (hours * 3600) / cooldown;
-      let expectedItems = totalSpawns * 1.5;
-      let magnets = expectedItems * chance;
-      let starFragments = expectedItems * price;
-
-      document.getElementById("result").innerHTML = `
-        Total Magnets: ${magnets.toFixed(2)}<br>
-        Total Star Fragments: ${starFragments.toFixed(2)}
-      `;
-    }
-
-    function showMagnetsPerStorm() {
-      document.getElementById("inputs").innerHTML = `
-        <h3>MagnetsPerStorm</h3>
-        <label>Work hours:</label><input id="storm_hours" type="number">
-        <label>Items per storm event:</label><input id="storm_items" type="number">
-        <label>Base magnets per item:</label><input id="storm_base" type="number" step="0.1">
-        <label>Multiplier value:</label><input id="storm_mult" type="number" step="0.1">
-        <label>Chance for multiplier to apply (%):</label><input id="storm_chance" type="number" step="0.1">
-        <label>Passive magnets per minute:</label><input id="storm_passive" type="number" step="0.1">
-        <br><button onclick="calcMagnetsPerStorm()">Calculate</button>
-      `;
-      document.getElementById("result").innerText = "";
-    }
-
-    function calcMagnetsPerStorm() {
-      let hours = parseFloat(document.getElementById("storm_hours").value);
-      let items = parseFloat(document.getElementById("storm_items").value);
-      let base = parseFloat(document.getElementById("storm_base").value);
-      let mult = parseFloat(document.getElementById("storm_mult").value);
-      let chance = parseFloat(document.getElementById("storm_chance").value);
-      let passive = parseFloat(document.getElementById("storm_passive").value);
-
-      let stormEvents = (hours * 60) / 5;
-      let avgMagnetsPerItem = (chance / 100) * (base * mult) + (1 - chance / 100) * base;
-      let totalMagnetsFromStorms = stormEvents * items * avgMagnetsPerItem;
-      let totalPassive = hours * 60 * passive;
-      let total = totalMagnetsFromStorms + totalPassive;
-
-      document.getElementById("result").innerHTML = `
-        Magnets from Storms: ${totalMagnetsFromStorms.toFixed(2)}<br>
-        Passive Magnets: ${totalPassive.toFixed(2)}<br>
-        Total Magnets: ${total.toFixed(2)}
-      `;
-    }
-  </script>
+        <div id="storm-form" class="form" style="display:none;">
+            <h2>Magnets Per Storm</h2>
+            <label>Work hours: <input type="number" id="workHoursStorm" step="0.1"></label>
+            <label>Items per event: <input type="number" id="itemsPerEvent"></label>
+            <label>Base magnets per item: <input type="number" id="baseMagnets"></label>
+            <label>Final percentage boost on base magnet (e.g., 54 for 54%): <input type="number" id="percentBoostStorm"></label>
+            <label>Passive magnets per minute: <input type="number" id="passivePerMin"></label>
+            <div id="multipliers"></div>
+            <button onclick="addMultiplier()">Add Multiplier</button>
+            <button onclick="calculateStorm()">Calculate</button>
+            <div id="storm-results" class="results"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
